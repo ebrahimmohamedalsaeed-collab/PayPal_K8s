@@ -40,23 +40,16 @@ pipeline {
                 '''
             }
         }
-        stage('Push Updates to GitHub') {
-            steps {
-                dir('project-files') {
-                    sh '''
-                    # تأكد أنك على الفرع main
-                    git checkout main || git checkout -b main
-
-                    # أضف كل التغييرات
-                    git add .
-
-                    # اعمل commit لو فيه تغييرات فعلية
-                    git commit -m "Update images for ArgoCD deployment" || echo "No changes to commit"
-
-                    # ادفع التغييرات للـ remote
-                    git push origin main
-                    '''
-                }
+       stage('Push Updates to GitHub') {
+    steps {
+        dir('project-files') {
+            withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                sh '''
+                git checkout main || git checkout -b main
+                git add .
+                git commit -m "Update images for ArgoCD deployment" || echo "No changes to commit"
+                git push https://$GIT_USER:$GIT_PASS@github.com/ebrahimmohamedalsaeed-collab/PayPal_K8s.git main
+                '''
             }
         }
     }
