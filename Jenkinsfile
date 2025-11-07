@@ -15,13 +15,14 @@ pipeline {
                 } 
             }
         }
-        stage('Push Images') {
+        stage('Push Docker Images') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'DOCKERHUB_PASS', usernameVariable: 'DOCKERHUB_USER')]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
                     sh '''
                         echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USER" --password-stdin
                         docker push $DOCKERHUB_USER/phishing-backend:latest
                         docker push $DOCKERHUB_USER/phishing-frontend:latest
+                        docker logout
                     '''
                 }
             }
@@ -40,17 +41,19 @@ pipeline {
                 '''
             }
         }
-       stage('Push Updates to GitHub') {
-    steps {
-        dir('project-files') {
-            withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-                sh '''
-                git checkout main || git checkout -b main
-                git add .
-                git commit -m "Update images for ArgoCD deployment" || echo "No changes to commit"
-                git push https://$GIT_USER:$GIT_PASS@github.com/ebrahimmohamedalsaeed-collab/PayPal_K8s.git main
-                '''
+        stage('Push Updates to GitHub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                    dir('project-files') {
+                        sh '''
+                        git checkout main || git checkout -b main
+                        git add .
+                        git commit -m "Update images for ArgoCD deployment" || echo "No changes to commit"
+                        git push https://$GIT_USER:$GIT_PASS@github.com/ebrahimmohamedalsaeed-collab/PayPal_K8s.git main
+                        '''
+                    }
+                }
             }
         }
     }
-}
+} // <- تأكد إن القوس ده موجود
