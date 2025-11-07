@@ -2,10 +2,18 @@ pipeline {
     agent any
     stages {
         stage('Build Backend Image') {
-            steps { dir('Backend') { sh 'docker build -t ebrahimrhh/phishing-backend:latest .' } }
+            steps { 
+                dir('Backend') { 
+                    sh 'docker build -t ebrahimrhh/phishing-backend:latest .' 
+                } 
+            }
         }
         stage('Build Frontend Image') {
-            steps { dir('my-nginx') { sh 'docker build -t ebrahimrhh/phishing-frontend:latest .' } }
+            steps { 
+                dir('my-nginx') { 
+                    sh 'docker build -t ebrahimrhh/phishing-frontend:latest .' 
+                } 
+            }
         }
         stage('Push Images') {
             steps {
@@ -36,8 +44,16 @@ pipeline {
             steps {
                 dir('project-files') {
                     sh '''
+                    # تأكد أنك على الفرع main
+                    git checkout main || git checkout -b main
+
+                    # أضف كل التغييرات
                     git add .
-                    git commit -m "Update images for ArgoCD deployment"
+
+                    # اعمل commit لو فيه تغييرات فعلية
+                    git commit -m "Update images for ArgoCD deployment" || echo "No changes to commit"
+
+                    # ادفع التغييرات للـ remote
                     git push origin main
                     '''
                 }
