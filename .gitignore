@@ -15,3 +15,6 @@ Thumbs.db
 
 # Sensitive
 *.env
+
+project-files@tmp/
+
